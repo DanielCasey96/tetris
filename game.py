@@ -8,7 +8,7 @@ class TetrisGame:
         self.screen = screen
         self.clock = pygame.time.Clock()
         self.cell_size = 30
-        self.playable_area_width = 20
+        self.playable_area_width = 8
         self.playable_area_height = 20
         self.board_width = self.playable_area_width
         self.board_height = self.playable_area_height
@@ -22,8 +22,6 @@ class TetrisGame:
         self.current_piece_y = 0
         self.score = 0
         self.new_piece()
-
-    # Rest of the TetrisGame class methods...
 
     def new_piece(self):
         if not self.game_over_flag:
@@ -107,7 +105,7 @@ class TetrisGame:
                     self.board[self.current_piece_y + y][self.current_piece_x + x] = 1
 
         # Check for completed rows and clear them
-        self.clear_completed_rows()
+        self.clear_rows()
 
         # Generate a new piece
         self.new_piece()
@@ -140,16 +138,26 @@ class TetrisGame:
                         return True
         return False
 
-    def clear_completed_rows(self):
-        completed_rows = []
-        for y in range(self.board_height):
-            if all(self.board[y]):
-                completed_rows.append(y)
+    def clear_rows(self):
+        inc = 0
+        rows_to_clear = []
+        for i in range(len(self.board) - 1, -1, -1):
+            row = self.board[i]
+            if 0 not in row:
+                inc += 1
+                rows_to_clear.append(i)
 
-        # Remove completed rows and add new empty rows at the top
-        for row in completed_rows:
-            del self.board[row]
+        # Remove the completed rows and add new empty rows at the top
+        for row_index in rows_to_clear:
+            del self.board[row_index]
             self.board.insert(0, [0] * self.board_width)
+
+        # Update the positions in the locked positions dictionary
+        for row_index in rows_to_clear:
+            for y in range(row_index + inc, row_index, -1):
+                self.board[y] = self.board[y - inc - 1]  # Adjusted this line
+            self.board[row_index] = [0] * self.board_width  # Added this line
+
 
     def handle_input(self):
         for event in pygame.event.get():
@@ -198,7 +206,6 @@ class TetrisGame:
             # Check if the game is over
             if self.game_over_flag:
                 break  # Exit the loop when the game is over
-
 
     @classmethod
     def start_game(cls, screen):
