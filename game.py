@@ -14,7 +14,7 @@ class TetrisGame:
         self.board_height = self.playable_area_height
         self.screen_width = self.board_width * self.cell_size
         self.screen_height = self.board_height * self.cell_size
-        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))  # Set screen size here
+        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         pygame.display.set_caption("Tetris")
         self.board = [[0] * self.board_width for _ in range(self.board_height)]
         self.current_piece = None
@@ -39,14 +39,14 @@ class TetrisGame:
 
             # Check if the new piece overlaps with existing blocks
             if self.check_collision(0, 0):
-                self.game_over()  # Call a method to handle game over
+                self.game_over()
 
     def game_over(self):
         # Clear the screen
         self.screen.fill((0, 0, 0))
 
         # Load font file and render game over text
-        font_path = pygame.font.match_font('arial')  # You can change 'arial' to any other font name
+        font_path = pygame.font.match_font('arial')
         font = pygame.font.Font(font_path, 64)  # Load font with size 64
         game_over_text = font.render("Game Over", True, (255, 255, 255))
         text_rect = game_over_text.get_rect(center=(self.screen.get_width() / 2, self.screen.get_height() / 2))
@@ -104,16 +104,11 @@ class TetrisGame:
         self.current_piece = rotated_piece
 
     def lock_piece(self):
-        # Add the current piece to the game board
         for y, row in enumerate(self.current_piece):
             for x, cell in enumerate(row):
                 if cell:
                     self.board[self.current_piece_y + y][self.current_piece_x + x] = 1
-
-        # Check for completed rows and clear them
         self.clear_rows()
-
-        # Generate a new piece
         self.new_piece()
 
     def check_collision(self, offset_x, offset_y):
@@ -164,11 +159,10 @@ class TetrisGame:
 
     def run(self):
         running = True
-        tick_rate = 500  # milliseconds (adjust as needed)
+        tick_rate = 500
         last_drop_time = pygame.time.get_ticks()
 
         while running:
-            # Handle user input
             self.handle_input()
 
             # Update game state periodically based on tick rate
@@ -187,9 +181,8 @@ class TetrisGame:
             # Cap the frame rate
             self.clock.tick(30)
 
-            # Check if the game is over
             if self.game_over_flag:
-                break  # Exit the loop when the game is over
+                break
 
     @classmethod
     def start_game(cls, screen):
