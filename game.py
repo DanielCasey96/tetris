@@ -111,9 +111,19 @@ class TetrisGame:
         return False
 
     def rotate_piece(self):
+        # Rotate the piece
         rotated_piece = [list(row) for row in self.current_piece]
-        rotated_piece = list(zip(*rotated_piece))
-        rotated_piece = [list(reversed(row)) for row in rotated_piece]
+        rotated_piece = list(zip(*rotated_piece[::-1]))  # Rotate the piece counterclockwise
+
+        # Check if the rotated piece goes out of bounds
+        max_x = self.current_piece_x + len(rotated_piece[0])
+        max_y = self.current_piece_y + len(rotated_piece)
+        if max_x > self.board_width:
+            self.current_piece_x -= (max_x - self.board_width)
+        if max_y > self.board_height:
+            self.current_piece_y -= (max_y - self.board_height)
+
+        # Update the current piece with the rotated piece
         self.current_piece = rotated_piece
 
     def lock_piece(self):
