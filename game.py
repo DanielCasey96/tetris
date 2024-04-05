@@ -97,19 +97,6 @@ class TetrisGame:
             return True
         return False
 
-    def freeze_piece(self):
-        # Add the current piece to the game board
-        for y, row in enumerate(self.current_piece):
-            for x, cell in enumerate(row):
-                if cell:
-                    self.board[self.current_piece_y + y][self.current_piece_x + x] = 1
-
-        # Check for completed rows and clear them
-        self.clear_rows()
-
-        # Generate a new piece
-        self.new_piece()
-
     def rotate_piece(self):
         rotated_piece = [list(row) for row in self.current_piece]
         rotated_piece = list(zip(*rotated_piece))
@@ -122,6 +109,12 @@ class TetrisGame:
             for x, cell in enumerate(row):
                 if cell:
                     self.board[self.current_piece_y + y][self.current_piece_x + x] = 1
+
+        # Check for completed rows and clear them
+        self.clear_rows()
+
+        # Generate a new piece
+        self.new_piece()
 
     def check_collision(self, offset_x, offset_y):
         for y, row in enumerate(self.current_piece):
@@ -139,24 +132,15 @@ class TetrisGame:
         return False
 
     def clear_rows(self):
-        inc = 0
-        rows_to_clear = []
-        for i in range(len(self.board) - 1, -1, -1):
-            row = self.board[i]
-            if 0 not in row:
-                inc += 1
-                rows_to_clear.append(i)
+        completed_rows = []
+        for y in range(self.board_height):
+            if all(self.board[y]):
+                completed_rows.append(y)
 
-        # Remove the completed rows and add new empty rows at the top
-        for row_index in rows_to_clear:
-            del self.board[row_index]
+        # Remove completed rows and add new empty rows at the top
+        for row in completed_rows:
+            del self.board[row]
             self.board.insert(0, [0] * self.board_width)
-
-        # Update the positions in the locked positions dictionary
-        for row_index in rows_to_clear:
-            for y in range(row_index + inc, row_index, -1):
-                self.board[y] = self.board[y - inc - 1]  # Adjusted this line
-            self.board[row_index] = [0] * self.board_width  # Added this line
 
 
     def handle_input(self):
