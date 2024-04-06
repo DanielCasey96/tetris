@@ -30,6 +30,7 @@ class TetrisGame:
             4: 800
         }
 
+
     def new_piece(self):
         if not self.game_over_flag:
             self.current_piece = random.choice([
@@ -150,32 +151,24 @@ class TetrisGame:
         return False
 
     def clear_rows(self):
-        inc = 0
         rows_to_clear = []
-        for i in range(len(self.board) - 1, -1, -1):
-            row = self.board[i]
-            if 0 not in row:
-                inc += 1
+        for i in range(len(self.board)):
+            if all(self.board[i]):
                 rows_to_clear.append(i)
 
         if rows_to_clear:  # Check if there are rows to clear
-            # Remove the completed rows and add new empty rows at the top
-            for row_index in rows_to_clear:
-                del self.board[row_index]
-                if row_index - inc >= 0:  # Check if index is non-negative
-                    self.board.insert(0, self.board[row_index - inc])  # Use the existing row
-                else:
-                    self.board.insert(0, [0] * self.board_width)  # Insert a new empty row
+            # Increment the score based on the number of rows cleared
+            num_rows_cleared = len(rows_to_clear)
+            self.score += self.points_per_line.get(num_rows_cleared, 0)
 
-            # Update the positions in the locked positions dictionary
-            for row_index in rows_to_clear:
-                for y in range(row_index + inc, row_index, -1):
-                    if y - inc - 1 >= 0:  # Check if index is non-negative
-                        self.board[y] = self.board[y - inc - 1]  # Use the existing row
-                    else:
-                        self.board[y] = [0] * self.board_width  # Insert a new empty row
-                self.board[row_index] = [0] * self.board_width
+            # Remove the completed rows
+            for row_index in reversed(rows_to_clear):  # Iterate in reverse to avoid index shifting
+                if row_index < len(self.board):  # Check if the index is within the valid range
+                    del self.board[row_index]
 
+            # Add new empty rows at the top
+            for _ in range(num_rows_cleared):
+                self.board.insert(0, [0] * self.board_width)
 
     def handle_input(self):
         for event in pygame.event.get():
@@ -214,6 +207,10 @@ class TetrisGame:
         tick_rate = 500
         last_drop_time = pygame.time.get_ticks()
 
+        score_to_level_up = 1000
+        current_level = 1
+        speed_levels = {1: 500, 2: 400, 3: 300, 4: 200}
+
         while running:
             self.handle_input()
 
@@ -225,6 +222,15 @@ class TetrisGame:
                     if not self.game_over_flag:
                         self.new_piece()
                 last_drop_time = current_time
+
+            # Check if score reached to level up
+            if self.score >= score_to_level_up:
+                current_level += 1
+                score_to_level_up += 1000  # Increase score_to_level_up for the next level
+
+                # Adjust game speed based on the current level
+                if current_level in speed_levels:
+                    tick_rate = speed_levels[current_level]
 
             # Update and draw game board
             self.update_game_state()
